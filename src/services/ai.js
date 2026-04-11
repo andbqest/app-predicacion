@@ -1,5 +1,5 @@
 export async function parsearMensaje(texto) {
-  const response = await fetch('http://localhost:3001/api/parsear', {
+  const response = await fetch('https://app-predicacion-production.up.railway.app/api/parsear', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
