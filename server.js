@@ -3,7 +3,7 @@ import cors from "cors";
 const app=express();
 app.use(cors());
 app.use(express.json());
-const KEY="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";
+const KEY="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";
 const MODELOS=["arcee-ai/trinity-large-preview:free","nvidia/nemotron-3-super-120b-a12b:free"];
 async function llamarIA(texto){
 const hoy=new Date().toISOString().split("T")[0];
