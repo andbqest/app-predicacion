@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react';
 import { db } from "../services/supabase";
 
+const DESIGN = {
+  colors: {
+    primary: '#4A4AE8',
+    text: '#1A202C',
+    gray: '#718096'
+  }
+};
+
 export default function Review({ contacto: contactoInicial, onFinalizar }) {
   // 1. ESTADO INICIAL COMPLETO
   // Garantizamos que todos los campos existan desde el segundo 1
@@ -16,7 +24,7 @@ export default function Review({ contacto: contactoInicial, onFinalizar }) {
     temas_interes: '',
     ...contactoInicial 
   });
-
+  
   const [guardando, setGuardando] = useState(false);
 
   // Sincronización si los props cambian
