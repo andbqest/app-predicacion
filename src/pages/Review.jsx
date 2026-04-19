@@ -1,17 +1,31 @@
 import { useState, useEffect } from 'react';
 import { db } from "../services/supabase";
 
-const DESIGN_SAFE = {
+const DESIGN = {
   colors: {
     primary: '#4A4AE8',
+    secondary: '#E2E8F0',
     text: '#1A202C',
+    textLight: '#718096',
+    background: '#F8FAFC',
     border: '#E2E8F0',
-    background: '#F8FAFC'
+    white: '#FFFFFF',
+    error: '#d93025'
   },
-  shadows: { soft: '0 4px 12px rgba(0,0,0,0.05)' },
-  radius: { soft: '12px' }
+  shadows: {
+    soft: '0 4px 12px rgba(0,0,0,0.05)',
+    medium: '0 8px 24px rgba(0,0,0,0.1)'
+  },
+  radius: {
+    soft: '12px',
+    medium: '16px',
+    full: '999px'
+  },
+  spacing: {
+    padding: '20px',
+    gap: '12px'
+  }
 };
-
 // Si DESIGN no existe globalmente, lo creamos para que tus 300 líneas no fallen
 const D = (typeof DESIGN !== 'undefined') ? DESIGN : DESIGN_SAFE;
 
