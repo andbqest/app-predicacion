@@ -17,7 +17,7 @@ async function llamarIA(texto) {
   for (const modelo of MODELOS) {
     try {
       console.log("Intentando modelo:", modelo);
-      const r = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      const r = await fetch("https://servidor-predicacion.sanfernando-predicacion.workers.dev", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": "Bearer " + KEY },
         body: JSON.stringify({ model: modelo, max_tokens: 1000, messages: [{ role: "user", content: prompt + " " + texto }] })

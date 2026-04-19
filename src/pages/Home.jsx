@@ -1,20 +1,38 @@
 import { useState } from 'react';
 import { parsearMensaje } from '../services/ai';
+import { db } from '../services/supabase';
 
 export default function Home({ onContactoParsed }) {
   const [mensaje, setMensaje] = useState('');
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState('');
+  const guardarNuevo = async (datos) => {
+  const { error } = await db
+    .from('contactos')
+    .insert([datos]);
 
+  if (error) {
+    console.error("Error al crear:", error);
+  } else {
+    setPantalla('contactos'); // Regresa a la lista
+  }
+};
   async function handleAnalizar() {
     if (!mensaje.trim()) return;
+    
     setCargando(true);
     setError('');
+
     try {
-      const datos = await parsearMensaje(mensaje);
-      onContactoParsed(datos);
+      // 1. Llamada real a la IA
+      const resultado = await parsearMensaje(mensaje);
+      
+      // 2. Pasamos los datos extraídos a la pantalla de revisión
+      onContactoParsed(resultado);
+      
     } catch (e) {
-      setError(e.message);
+      console.error("Error en la conexión:", e);
+      setError("No se pudo conectar con la IA. Asegúrate de que el servidor esté encendido (npx wrangler dev --remote).");
     } finally {
       setCargando(false);
     }
@@ -32,7 +50,7 @@ export default function Home({ onContactoParsed }) {
       <textarea
         value={mensaje}
         onChange={e => setMensaje(e.target.value)}
-        placeholder="Ejemplo: Hoy hablé con María González en el sector norte cerca del parque. Le interesa mucho el tema de la vida después de la muerte. Quedamos en volver el próximo sábado con una revista."
+        placeholder="Ejemplo: Hoy hablé con Pedro Ramírez sobre el sufrimiento..."
         style={{
           width: '100%',
           height: '180px',
@@ -41,7 +59,7 @@ export default function Home({ onContactoParsed }) {
           border: '1px solid #ddd',
           borderRadius: '8px',
           resize: 'vertical',
-          fontFamily: 'inherit',
+          fontFamily: '"Inter", sans-serif',
           boxSizing: 'border-box'
         }}
       />

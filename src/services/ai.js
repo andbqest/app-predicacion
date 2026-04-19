@@ -1,21 +1,26 @@
-export async function parsearMensaje(texto) {
-  const response = await fetch('https://app-predicacion-production.up.railway.app/api/parsear', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ texto })
-  });
+export const parsearMensaje = async (texto) => {
+  try {
+    const response = await fetch("https://servidor-predicacion.sanfernando-predicacion.workers.dev", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ texto }),
+    });
 
-  if (!response.ok) {
-    throw new Error('Error al conectar con el servidor.');
+    const data = await response.json();
+    
+    // Extraemos la respuesta de la IA
+    let contenidoIA = data.response || data;
+
+    // Si es un texto, buscamos el JSON dentro de las llaves { }
+    if (typeof contenidoIA === 'string') {
+      const coincidencia = contenidoIA.match(/\{[\s\S]*\}/);
+      if (coincidencia) {
+        return JSON.parse(coincidencia[0]);
+      }
+    }
+    return contenidoIA;
+  } catch (error) {
+    console.error("Error en la App:", error);
+    throw error;
   }
-
-  const datos = await response.json();
-
-  if (datos.error) {
-    throw new Error('No se pudo interpretar el mensaje. Intenta ser más específico.');
-  }
-
-  return datos;
-}
+};
