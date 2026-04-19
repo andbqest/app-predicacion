@@ -9,7 +9,7 @@ import Detail from './pages/Detail';
  * COMPONENTE PRINCIPAL: App
  * Optimizado para trabajo en equipo y sincronización inmediata.
  */
-export default function App() {
+export default function App() { 
   const [pantalla, setPantalla] = useState('contactos');
   const [listaContactos, setListaContactos] = useState([]);
   const [contactoSeleccionado, setContactoSeleccionado] = useState(null);
@@ -20,29 +20,35 @@ export default function App() {
   const cargarTodo = useCallback(async () => {
     try {
       setCargando(true);
-      const datos = await db.contactos.toArray();
-      
-      // Ordenamos: Los más recientes primero por ID o por fecha de actualización
-      const ordenados = datos.sort((a, b) => {
+
+      // 1. Pedimos los datos a Supabase
+      const { data, error } = await db.from('contactos').select('*');
+
+      if (error) throw error;
+
+      // 2. Ordenamos los datos obtenidos (data)
+      const ordenados = (data || []).sort((a, b) => {
         const idA = a.id || 0;
         const idB = b.id || 0;
         return idB - idA;
       });
 
-      setListaContactos([...ordenados]); 
+      // 3. Actualizamos el estado con los datos ordenados
+      setListaContactos([...ordenados]);
+      
       console.log("🔄 Base de Datos Sincronizada:", ordenados.length, "registros encontrados.");
+
     } catch (error) {
-      console.error("❌ Error crítico al sincronizar:", error);
+      console.error("❌ Error crítico al cargar/sincronizar:", error.message || error);
     } finally {
       setCargando(false);
     }
-  }, []);
+  }, [db]);
 
   // Efecto de carga inicial
   useEffect(() => { 
     cargarTodo(); 
     
-    // Escuchador para cambios externos (útil si hay varias pestañas abiertas)
     const handleStorageChange = () => cargarTodo();
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
@@ -56,24 +62,34 @@ export default function App() {
     setContactoSeleccionado(null);
   };
 
+  const refrescarInterfaz = async () => {
+    try {
+      const { data: datosActualizados, error } = await db
+        .from('contactos')
+        .select('*');
+
+      if (error) throw error;
+
+      if (datosActualizados) {
+        const ordenados = [...datosActualizados].sort((a, b) => 
+          (b.id || 0) - (a.id || 0)
+        );
+        setListaContactos(ordenados);
+        console.log("✅ Interfaz refrescada y lista para usar.");
+      }
+    } catch (error) {
+      console.error("❌ Error al refrescar la interfaz:", error.message || error);
+    }
+  };
+
   const irAContactos = async () => {
-    // 1. Efecto visual de limpieza rápida
     setListaContactos([]); 
     setPantalla('contactos'); 
-    
-    // 2. Pequeña pausa táctica para asegurar que la DB terminó cualquier escritura previa
     await new Promise(resolve => setTimeout(resolve, 150));
-    
-    // 3. Recarga forzada de la lista
-    const datosActualizados = await db.contactos.toArray();
-    const ordenados = datosActualizados.sort((a, b) => (b.id || 0) - (a.id || 0));
-    setListaContactos([...ordenados]);
-    
-    console.log("✅ Interfaz refrescada y lista para usar.");
+    await refrescarInterfaz();
   };
   
   const iniciarEdicion = (contacto) => {
-    // Preparamos los datos asegurando que no falte ningún campo
     const clonContacto = { ...contacto };
     setDatosParaEditar(clonContacto);
     setPantalla('revision');
@@ -88,7 +104,8 @@ export default function App() {
     const confirmacion = window.confirm("¿Estás seguro de que deseas eliminar este contacto? Esta acción no se puede deshacer.");
     if (confirmacion) {
       try {
-        await db.contactos.delete(id);
+        // Corregido a sintaxis Supabase para evitar crash
+        await db.from('contactos').delete().eq('id', id);
         console.log(`🗑️ Registro ${id} eliminado con éxito.`);
         await irAContactos();
       } catch (err) {
@@ -106,7 +123,7 @@ export default function App() {
       color: '#1C1E21'
     }}>
       
-      {/* BARRA SUPERIOR (NAVBAR) - Mejorada visualmente y fija */}
+      {/* BARRA SUPERIOR (NAVBAR) */}
       <header style={{
         backgroundColor: '#FFFFFF',
         padding: '14px 20px',
@@ -124,7 +141,6 @@ export default function App() {
           {pantalla !== 'contactos' && (
             <button 
               onClick={irAContactos}
-              aria-label="Volver atrás"
               style={{ 
                 background: '#F0F2F5', 
                 border: 'none', 
@@ -135,11 +151,8 @@ export default function App() {
                 fontSize: '20px',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'background 0.2s'
+                justifyContent: 'center'
               }}
-              onMouseOver={(e) => e.currentTarget.style.background = '#E4E6EB'}
-              onMouseOut={(e) => e.currentTarget.style.background = '#F0F2F5'}
             >
               ←
             </button>
@@ -162,11 +175,9 @@ export default function App() {
               borderRadius: '12px',
               border: 'none',
               fontWeight: '700',
-              fontSize: '14px',
               backgroundColor: pantalla === 'contactos' ? '#4A4AE8' : 'transparent',
               color: pantalla === 'contactos' ? 'white' : '#65676B',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease'
+              cursor: 'pointer'
             }}
           >
             Lista
@@ -178,11 +189,9 @@ export default function App() {
               borderRadius: '12px',
               border: 'none',
               fontWeight: '700',
-              fontSize: '14px',
               backgroundColor: pantalla === 'nuevo' ? '#4A4AE8' : 'transparent',
               color: pantalla === 'nuevo' ? 'white' : '#65676B',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease'
+              cursor: 'pointer'
             }}
           >
             + Nuevo
@@ -190,7 +199,6 @@ export default function App() {
         </div>
       </header>
 
-      {/* CONTENIDO DINÁMICO CON CONTENEDOR DE SEGURIDAD */}
       <main style={{ 
         padding: '16px', 
         maxWidth: '650px', 
@@ -236,7 +244,6 @@ export default function App() {
         )}
       </main>
 
-      {/* FOOTER DE ESTADO (Invisible pero funcional para asegurar altura) */}
       <footer style={{ height: '40px', opacity: 0 }}>
         Espaciador técnico de final de página
       </footer>
