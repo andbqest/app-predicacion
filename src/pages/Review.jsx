@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { db } from "../services/supabase";
 
 export default function Review({ contacto: contactoInicial, onFinalizar }) {
-  // Inicializamos el estado con los datos recibidos o un objeto vacío para evitar el error "undefined"
+  // 1. ESTADO INICIAL COMPLETO
+  // Garantizamos que todos los campos existan desde el segundo 1
   const [formData, setFormData] = useState({
     nombre: '',
     lugar: '',
@@ -13,42 +14,64 @@ export default function Review({ contacto: contactoInicial, onFinalizar }) {
     proxima_accion: '',
     observaciones: '',
     temas_interes: '',
-    ...contactoInicial // Sobrescribimos con los datos reales si existen
+    ...contactoInicial 
   });
 
   const [guardando, setGuardando] = useState(false);
 
-  // Si el contacto inicial cambia, actualizamos el formulario
+  // Sincronización si los props cambian
   useEffect(() => {
     if (contactoInicial) {
       setFormData(prev => ({ ...prev, ...contactoInicial }));
     }
   }, [contactoInicial]);
 
+  // 2. FUNCIÓN DE GUARDADO BLINDADA
   const handleGuardar = async () => {
-    setGuardando(true); // Activamos el estado de carga
+    // Verificación de seguridad: si no hay nombre, no guardamos
+    if (!formData.nombre.trim()) {
+      alert("Por favor, ingresa al menos el nombre.");
+      return;
+    }
+
+    setGuardando(true);
+    
     try {
-      // CORRECCIÓN: Usamos 'formData' que es donde están los datos actuales del formulario
-      const { error } = await db
+      // Creamos el paquete de datos asegurándonos de que coincida con tu tabla de Supabase
+      const registroFinal = {
+        nombre: formData.nombre,
+        lugar: formData.lugar,
+        estado: formData.estado,
+        metodo_contacto: formData.metodo_contacto,
+        fecha: formData.fecha,
+        hora: formData.hora,
+        proxima_accion: formData.proxima_accion,
+        observaciones: formData.observaciones,
+        temas_interes: formData.temas_interes,
+        actualizado_en: new Date().toISOString()
+      };
+
+      // Si viene de una edición, incluimos el ID para que no cree uno nuevo
+      if (formData.id) registroFinal.id = formData.id;
+
+      const { error: errorSupa } = await db
         .from('contactos')
-        .upsert({
-          ...formData, // Antes decía 'contacto' (que no existía)
-          actualizado_en: new Date().toISOString()
-        });
+        .upsert(registroFinal);
 
-      if (error) throw error;
+      if (errorSupa) throw errorSupa;
 
-      alert("¡Sincronizado con el equipo!");
+      alert("¡Sincronizado con el equipo! 🚀");
       if (onFinalizar) onFinalizar(); 
-    } catch (error) {
-      console.error("Error al subir a la nube:", error);
-      alert("No se pudo compartir el cambio: " + error.message);
+
+    } catch (err) {
+      console.error("Error al subir a la nube:", err);
+      alert("Error técnico: " + (err.message || "No se pudo conectar con Supabase"));
     } finally {
-      setGuardando(false); // Desactivamos el estado de carga
+      setGuardando(false);
     }
   };
 
-  // --- ESTILOS ---
+  // 3. ESTILOS COMPLETOS (Tu diseño original)
   const s = {
     container: {
       padding: '20px',
@@ -56,72 +79,76 @@ export default function Review({ contacto: contactoInicial, onFinalizar }) {
       margin: '0 auto',
       backgroundColor: '#fff',
       borderRadius: '20px',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+      boxShadow: '0 4px 15px rgba(0,0,0,0.08)',
+      fontFamily: 'system-ui, -apple-system, sans-serif'
     },
     header: {
       marginBottom: '20px',
-      borderBottom: '1px solid #eee',
-      paddingBottom: '10px'
+      borderBottom: '1px solid #f0f0f0',
+      paddingBottom: '15px'
     },
     label: {
       display: 'block',
       fontSize: '14px',
       fontWeight: '700',
       color: '#4A5568',
-      marginBottom: '8px',
-      marginTop: '15px'
+      marginBottom: '6px',
+      marginTop: '16px'
     },
     input: {
       width: '100%',
-      padding: '12px',
+      padding: '14px',
       borderRadius: '12px',
       border: '2px solid #E2E8F0',
       fontSize: '16px',
       boxSizing: 'border-box',
       outline: 'none',
-      backgroundColor: '#F8FAFC'
+      backgroundColor: '#F8FAFC',
+      transition: 'border-color 0.2s'
     },
     textarea: {
       width: '100%',
-      padding: '12px',
+      padding: '14px',
       borderRadius: '12px',
       border: '2px solid #E2E8F0',
       fontSize: '15px',
-      minHeight: '80px',
+      minHeight: '100px',
       boxSizing: 'border-box',
-      resize: 'vertical'
+      resize: 'vertical',
+      backgroundColor: '#F8FAFC',
+      outline: 'none'
     },
     row: {
       display: 'grid',
       gridTemplateColumns: '1fr 1fr',
-      gap: '12px'
+      gap: '15px'
     },
     btnGuardar: {
       width: '100%',
-      padding: '16px',
-      backgroundColor: '#4A4AE8',
+      padding: '18px',
+      backgroundColor: guardando ? '#CBD5E0' : '#4A4AE8',
       color: 'white',
       border: 'none',
       borderRadius: '16px',
       fontSize: '16px',
       fontWeight: '700',
-      marginTop: '30px',
+      marginTop: '32px',
       cursor: guardando ? 'not-allowed' : 'pointer',
-      opacity: guardando ? 0.7 : 1
+      boxShadow: '0 4px 6px rgba(74, 74, 232, 0.2)',
+      transition: 'all 0.2s'
     }
   };
 
   return (
     <div style={s.container}>
       <header style={s.header}>
-        <h2 style={{ margin: 0, color: '#1A202C' }}>Editar Información</h2>
-        <p style={{ fontSize: '14px', color: '#718096', margin: '5px 0 0' }}>
-          Completa todos los campos para mantener tu registro al día.
+        <h2 style={{ margin: 0, color: '#1A202C', fontSize: '24px' }}>Revisar Información</h2>
+        <p style={{ fontSize: '14px', color: '#718096', margin: '8px 0 0' }}>
+          La IA ha extraído estos datos. Por favor, asegúrate de que todo sea correcto.
         </p>
       </header>
 
       <main>
-        {/* NOMBRE Y LUGAR */}
         <label style={s.label}>Nombre completo</label>
         <input 
           style={s.input}
@@ -135,13 +162,12 @@ export default function Review({ contacto: contactoInicial, onFinalizar }) {
           style={s.input}
           value={formData.lugar}
           onChange={(e) => setFormData({...formData, lugar: e.target.value})}
-          placeholder="Ej: Sector Las Acacias, Casa 4"
+          placeholder="Ej: Sector Las Acacias"
         />
 
-        {/* ESTADO Y CONTACTO */}
         <div style={s.row}>
           <div>
-            <label style={s.label}>Estado de visita</label>
+            <label style={s.label}>Estado</label>
             <select 
               style={s.input}
               value={formData.estado}
@@ -155,20 +181,19 @@ export default function Review({ contacto: contactoInicial, onFinalizar }) {
             </select>
           </div>
           <div>
-            <label style={s.label}>Teléfono / WhatsApp</label>
+            <label style={s.label}>Teléfono</label>
             <input 
               style={s.input}
               value={formData.metodo_contacto}
               onChange={(e) => setFormData({...formData, metodo_contacto: e.target.value})}
-              placeholder="Ej: 300 123..."
+              placeholder="Ej: 300..."
             />
           </div>
         </div>
 
-        {/* FECHA Y HORA */}
         <div style={s.row}>
           <div>
-            <label style={s.label}>Fecha de visita</label>
+            <label style={s.label}>Fecha</label>
             <input 
               type="date"
               style={s.input}
@@ -187,22 +212,19 @@ export default function Review({ contacto: contactoInicial, onFinalizar }) {
           </div>
         </div>
 
-        {/* PRÓXIMO PASO */}
         <label style={s.label}>Próximo paso a seguir</label>
         <input 
           style={s.input}
           value={formData.proxima_accion}
           onChange={(e) => setFormData({...formData, proxima_accion: e.target.value})}
-          placeholder="Ej: Llevar folleto 'Disfrute la vida'"
+          placeholder="¿Qué sigue?"
         />
 
-        {/* NOTAS Y TEMAS */}
-        <label style={s.label}>Temas de interés (¿De qué hablaron?)</label>
+        <label style={s.label}>Temas de interés</label>
         <textarea 
           style={s.textarea}
           value={formData.temas_interes}
           onChange={(e) => setFormData({...formData, temas_interes: e.target.value})}
-          placeholder="Ej: La resurrección, el Reino de Dios..."
         />
 
         <label style={s.label}>Notas adicionales</label>
@@ -210,7 +232,6 @@ export default function Review({ contacto: contactoInicial, onFinalizar }) {
           style={s.textarea}
           value={formData.observaciones}
           onChange={(e) => setFormData({...formData, observaciones: e.target.value})}
-          placeholder="Cualquier otro detalle importante..."
         />
 
         <button 
@@ -218,7 +239,7 @@ export default function Review({ contacto: contactoInicial, onFinalizar }) {
           onClick={handleGuardar}
           disabled={guardando}
         >
-          {guardando ? 'Guardando cambios...' : '✅ Guardar y Finalizar'}
+          {guardando ? 'Sincronizando con la nube...' : '✅ Guardar y Finalizar'}
         </button>
       </main>
 
