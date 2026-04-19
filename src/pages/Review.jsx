@@ -4,8 +4,17 @@ import { db } from "../services/supabase";
 const DESIGN = {
   colors: {
     primary: '#4A4AE8',
+    secondary: '#E2E8F0',
     text: '#1A202C',
-    gray: '#718096'
+    textLight: '#718096',
+    background: '#F8FAFC',
+    border: '#E2E8F0',
+    white: '#FFFFFF',
+    error: '#d93025'
+  },
+  spacing: {
+    padding: '20px',
+    borderRadius: '16px'
   }
 };
 
