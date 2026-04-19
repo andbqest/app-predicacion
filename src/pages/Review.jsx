@@ -1,34 +1,19 @@
-if (typeof window !== 'undefined') {
-  window.DESIGN = {
-    colors: {
-      primary: '#4A4AE8',
-      text: '#1A202C',
-      gray: '#718096',
-      border: '#E2E8F0',
-      background: '#F8FAFC'
-    }
-  };
-}
-
 import { useState, useEffect } from 'react';
 import { db } from "../services/supabase";
 
-const DESIGN = {
+const DESIGN_SAFE = {
   colors: {
     primary: '#4A4AE8',
-    secondary: '#E2E8F0',
     text: '#1A202C',
-    textLight: '#718096',
-    background: '#F8FAFC',
     border: '#E2E8F0',
-    white: '#FFFFFF',
-    error: '#d93025'
+    background: '#F8FAFC'
   },
-  spacing: {
-    padding: '20px',
-    borderRadius: '16px'
-  }
+  shadows: { soft: '0 4px 12px rgba(0,0,0,0.05)' },
+  radius: { soft: '12px' }
 };
+
+// Si DESIGN no existe globalmente, lo creamos para que tus 300 líneas no fallen
+const D = (typeof DESIGN !== 'undefined') ? DESIGN : DESIGN_SAFE;
 
 export default function Review({ contacto: contactoInicial, onFinalizar }) {
   // 1. ESTADO INICIAL COMPLETO
