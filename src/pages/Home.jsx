@@ -6,17 +6,10 @@ export default function Home({ onContactoParsed }) {
   const [mensaje, setMensaje] = useState('');
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState('');
-  const guardarNuevo = async (datos) => {
-  const { error } = await db
-    .from('contactos')
-    .insert([datos]);
 
-  if (error) {
-    console.error("Error al crear:", error);
-  } else {
-    setPantalla('contactos');
-  }
-};
+  // Eliminamos 'guardarNuevo' de aquí porque Home solo se encarga de analizar.
+  // El guardado final ocurre en la pantalla de Review.
+
   async function handleAnalizar() {
     if (!mensaje.trim()) return;
     
@@ -24,15 +17,20 @@ export default function Home({ onContactoParsed }) {
     setError('');
 
     try {
-      // 1. Llamada real a la IA
+      // 1. Llamada a la IA para procesar el texto
       const resultado = await parsearMensaje(mensaje);
       
-      // 2. Pasamos los datos extraídos a la pantalla de revisión
-      onContactoParsed(resultado);
+      // 2. Enviamos el resultado a App.jsx
+      // App.jsx recibirá esto y cambiará automáticamente a la pantalla 'revision'
+      if (resultado) {
+        onContactoParsed(resultado);
+      } else {
+        setError("La IA no pudo extraer datos válidos. Intenta escribir más detalles.");
+      }
       
     } catch (e) {
-      console.error("Error en la conexión:", e);
-      setError("No se pudo conectar con la IA. Asegúrate de que el servidor esté encendido (npx wrangler dev --remote).");
+      console.error("Error en la conexión con IA:", e);
+      setError("No se pudo conectar con la IA. Revisa la consola para más detalles.");
     } finally {
       setCargando(false);
     }
@@ -40,32 +38,34 @@ export default function Home({ onContactoParsed }) {
 
   return (
     <div style={{ padding: '24px', maxWidth: '600px', margin: '0 auto' }}>
-      <h1 style={{ fontSize: '22px', fontWeight: '500', marginBottom: '8px' }}>
+      <h1 style={{ fontSize: '22px', fontWeight: '800', marginBottom: '8px', color: '#1C1E21' }}>
         Nueva persona contactada
       </h1>
-      <p style={{ color: '#666', fontSize: '14px', marginBottom: '24px' }}>
+      <p style={{ color: '#65676B', fontSize: '14px', marginBottom: '24px' }}>
         Escribe tu nota como quieras. La IA organiza los datos automáticamente.
       </p>
 
       <textarea
         value={mensaje}
         onChange={e => setMensaje(e.target.value)}
-        placeholder="Ejemplo: Hoy hablé con Pedro Ramírez sobre el sufrimiento..."
+        placeholder="Ejemplo: Hoy hablé con Pedro Ramírez sobre el sufrimiento. Su teléfono es 0412..."
         style={{
           width: '100%',
           height: '180px',
-          padding: '12px',
-          fontSize: '15px',
+          padding: '16px',
+          fontSize: '16px',
           border: '1px solid #ddd',
-          borderRadius: '8px',
-          resize: 'vertical',
-          fontFamily: '"Inter", sans-serif',
-          boxSizing: 'border-box'
+          borderRadius: '12px',
+          resize: 'none',
+          fontFamily: 'inherit',
+          boxSizing: 'border-box',
+          backgroundColor: '#fff',
+          boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.05)'
         }}
       />
 
       {error && (
-        <p style={{ color: '#c0392b', fontSize: '14px', marginTop: '8px' }}>
+        <p style={{ color: '#d93025', fontSize: '14px', marginTop: '12px', fontWeight: '500' }}>
           ⚠️ {error}
         </p>
       )}
@@ -74,19 +74,20 @@ export default function Home({ onContactoParsed }) {
         onClick={handleAnalizar}
         disabled={cargando || !mensaje.trim()}
         style={{
-          marginTop: '16px',
+          marginTop: '20px',
           width: '100%',
-          padding: '14px',
+          padding: '16px',
           fontSize: '16px',
-          fontWeight: '500',
-          backgroundColor: cargando ? '#aaa' : '#4A4AE8',
-          color: 'white',
+          fontWeight: '700',
+          backgroundColor: cargando ? '#E4E6EB' : '#4A4AE8',
+          color: cargando ? '#bcc0c4' : 'white',
           border: 'none',
-          borderRadius: '8px',
-          cursor: cargando ? 'not-allowed' : 'pointer'
+          borderRadius: '12px',
+          cursor: cargando ? 'not-allowed' : 'pointer',
+          transition: 'all 0.2s ease'
         }}
       >
-        {cargando ? 'Analizando...' : 'Analizar mensaje'}
+        {cargando ? 'Analizando con IA...' : 'Analizar mensaje'}
       </button>
     </div>
   );

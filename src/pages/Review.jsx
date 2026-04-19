@@ -26,24 +26,27 @@ export default function Review({ contacto: contactoInicial, onFinalizar }) {
   }, [contactoInicial]);
 
   const handleGuardar = async () => {
-  try {
-    // CAMBIO: En lugar de db.contactos.put (Dexie), usamos db.from (Supabase)
-    const { error } = await db
-      .from('contactos')
-      .upsert({
-        ...contacto,
-        actualizado_en: new Date().toISOString()
-      });
+    setGuardando(true); // Activamos el estado de carga
+    try {
+      // CORRECCIÓN: Usamos 'formData' que es donde están los datos actuales del formulario
+      const { error } = await db
+        .from('contactos')
+        .upsert({
+          ...formData, // Antes decía 'contacto' (que no existía)
+          actualizado_en: new Date().toISOString()
+        });
 
-    if (error) throw error;
+      if (error) throw error;
 
-    alert("¡Sincronizado con el equipo!");
-    if (onFinalizar) onFinalizar(); 
-  } catch (error) {
-    console.error("Error al subir a la nube:", error);
-    alert("No se pudo compartir el cambio.");
-  }
-};
+      alert("¡Sincronizado con el equipo!");
+      if (onFinalizar) onFinalizar(); 
+    } catch (error) {
+      console.error("Error al subir a la nube:", error);
+      alert("No se pudo compartir el cambio: " + error.message);
+    } finally {
+      setGuardando(false); // Desactivamos el estado de carga
+    }
+  };
 
   // --- ESTILOS ---
   const s = {
@@ -219,12 +222,6 @@ export default function Review({ contacto: contactoInicial, onFinalizar }) {
         </button>
       </main>
 
-      {/* FOOTER DE RELLENO TÉCNICO
-          Este componente gestiona ahora 9 campos de datos de forma simultánea.
-          Se ha corregido el error de referencia inicializando el estado con 
-          operadores de propagación (spread operators), lo que garantiza que 
-          ninguna propiedad leída en el render sea 'undefined'.
-      */}
       <div style={{ height: '40px' }}></div>
     </div>
   );
