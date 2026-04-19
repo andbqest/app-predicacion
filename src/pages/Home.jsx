@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { parsearMensaje } from '../services/ai';
 import { db } from "../services/supabase";
+import { parsearMensaje } from '../services/ai';
 
 export default function Home({ onContactoParsed }) {
   const [mensaje, setMensaje] = useState('');
@@ -14,7 +14,7 @@ export default function Home({ onContactoParsed }) {
   if (error) {
     console.error("Error al crear:", error);
   } else {
-    setPantalla('contactos'); // Regresa a la lista
+    setPantalla('contactos');
   }
 };
   async function handleAnalizar() {

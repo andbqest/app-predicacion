@@ -1,10 +1,6 @@
 import { useState, useEffect } from 'react';
 import { db } from "../services/supabase";
 
-/**
- * COMPONENTE REVIEW (Edición Completa)
- * Este componente permite modificar cada detalle del contacto.
- */
 export default function Review({ contacto: contactoInicial, onFinalizar }) {
   // Inicializamos el estado con los datos recibidos o un objeto vacío para evitar el error "undefined"
   const [formData, setFormData] = useState({

@@ -1,10 +1,7 @@
 import { useState, useEffect } from 'react';
 import { db } from "../services/supabase";
 
-/**
- * CONFIGURACIÓN DE ESTADOS (DICCIONARIO DE COLORES Y ETIQUETAS)
- * Mantenemos esto fuera del componente para que sea fácil de editar.
- */
+
 const ESTADOS = {
   activo: { label: 'Activo', color: '#27ae60', bg: '#eafaf1', icon: '🟢' },
   en_seguimiento: { label: 'En seguimiento', color: '#2980b9', bg: '#ebf5fb', icon: '🔵' },
