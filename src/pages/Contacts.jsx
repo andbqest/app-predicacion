@@ -1,5 +1,6 @@
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable'; // Importamos la función directamente
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import { db } from "../services/supabase";
 import * as XLSX from 'xlsx';
 import { useState, useMemo } from 'react';
 /**
