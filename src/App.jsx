@@ -150,7 +150,7 @@ export default function App() {
             fontSize: '19px',
             letterSpacing: '-0.5px'
           }}>
-            📖 San Fernando del Guapo
+             San Fernando del Guapo
           </span>
         </div>
         
