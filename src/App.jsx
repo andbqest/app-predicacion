@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { db } from '../services/supabase';
+import { db } from './services/supabase';
 import Home from './pages/Home';
 import Review from './pages/Review';
 import Contacts from './pages/Contacts';
