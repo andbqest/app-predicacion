@@ -1,3 +1,15 @@
+if (typeof window !== 'undefined') {
+  window.DESIGN = {
+    colors: {
+      primary: '#4A4AE8',
+      text: '#1A202C',
+      gray: '#718096',
+      border: '#E2E8F0',
+      background: '#F8FAFC'
+    }
+  };
+}
+
 import { useState, useEffect } from 'react';
 import { db } from "../services/supabase";
 
