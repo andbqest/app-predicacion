@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { db } from '../services/db';
+import { db } from './services/supabase';
 
 /**
  * COMPONENTE REVIEW (Edición Completa)

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { parsearMensaje } from '../services/ai';
-import { db } from '../services/supabase';
+import { db } from './services/supabase';
 
 export default function Home({ onContactoParsed }) {
   const [mensaje, setMensaje] = useState('');

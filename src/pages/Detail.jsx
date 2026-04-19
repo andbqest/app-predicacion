@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { db } from '../services/supabase';
+import { db } from './services/supabase';
 
 /**
  * CONFIGURACIÓN DE ESTADOS (DICCIONARIO DE COLORES Y ETIQUETAS)
